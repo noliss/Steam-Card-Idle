@@ -43,3 +43,8 @@ release/
 Thumbs.db
 Desktop.ini
 *.stackdump
+
+# Local README screenshot tooling (keep PNGs only)
+scripts/capture_readme_shots.py
+assets/readme/README-snippet.md
+assets/readme/trio-preview.jpg

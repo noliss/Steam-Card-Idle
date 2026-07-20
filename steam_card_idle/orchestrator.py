@@ -44,7 +44,7 @@ class FarmStatus:
 
 
 class Orchestrator:
-    """Badge scan + idle loop with stable Fast Mode (no constant game switching)."""
+    """Badge scan + idle loop (Fast multi or Solo) with Farm → Flush → Collect."""
 
     def __init__(
         self,
@@ -222,16 +222,95 @@ class Orchestrator:
         while time.time() < end:
             time.sleep(min(0.25, max(0.0, end - time.time())))
 
+    def _wave_timings(self) -> tuple[int, int]:
+        farm_sec = max(60, int(getattr(self.cfg, "farm_wave_sec", 300) or 300))
+        flush_sec = max(8, int(getattr(self.cfg, "flush_pause_sec", 15) or 15))
+        return farm_sec, flush_sec
+
+    def _flush_and_collect(self, queue: list[Badge], *, running_n: int | None = None) -> list[CardDrop]:
+        """Stop sessions, wait for Steam to credit drops, read inventory."""
+        _, flush_sec = self._wave_timings()
+        n = len(self.manager.running_ids()) if running_n is None else running_n
+        self.log(
+            f"Flush: stopping {n} game(s) for {flush_sec}s "
+            "(Steam credits cards after sessions close)"
+        )
+        self.emit(
+            phase=Phase.FLUSH,
+            badges=queue,
+            message=f"Flush: pausing {flush_sec}s — waiting for drops…",
+        )
+        self.manager.stop_all()
+
+        # Uninterruptible: Steam often credits cards only after sessions fully end
+        self._flush_pause(flush_sec)
+
+        new_drops = self._note_inventory_drops()
+        if not new_drops:
+            self._flush_pause(5)
+            more = self._note_inventory_drops()
+            new_drops.extend(more)
+
+        if new_drops:
+            self.log(
+                f"Flush: +{sum(d.count for d in new_drops)} cards "
+                f"(session total {self.drops.session_total})"
+            )
+        else:
+            self.log("Flush: no new cards in inventory")
+
+        self.emit(
+            phase=Phase.FLUSH,
+            badges=queue,
+            message=(
+                f"Flush done · 🎴 {self.drops.session_total}"
+                + (f" · +{sum(d.count for d in new_drops)}" if new_drops else "")
+            ),
+        )
+        return new_drops
+
+    def _rescan_after_flush(self) -> list[Badge]:
+        assert self.session
+        queue = fetch_badges(self.session, self.cfg)
+        if self.drops.inventory_primed:
+            self.drops.update(queue)
+        else:
+            self._note_drops(queue)
+        self.log(
+            f"After flush: {len(queue)} games, {total_drops(queue)} cards remaining"
+        )
+        return queue
+
     def _normal_loop(self, badges: list[Badge]) -> None:
+        """
+        Solo Farm → Flush → Collect.
+
+        Same credit trick as Fast Mode, but one game at a time: idle until
+        farm_wave_sec, stop briefly so Steam can drop cards, then continue.
+        """
+        assert self.session
+        farm_sec, _flush_sec = self._wave_timings()
         queue = list(badges)
+        skipped_ids: set[int] = set()
+
         while queue and not self._stop.is_set():
-            badge = queue[0]
+            # Prefer first non-skipped game still in the badge list
+            badge = next((b for b in queue if b.app_id not in skipped_ids), None)
+            if badge is None:
+                break
+            # Keep skipped titles out of the working queue order
+            if queue[0].app_id != badge.app_id:
+                queue = [badge] + [b for b in queue if b.app_id != badge.app_id]
+
             self._skip_current = False
             self.emit(
                 phase=Phase.NORMAL,
                 current=badge,
                 badges=queue,
-                message=f"Idle: {badge.name} ({badge.remaining} cards)",
+                message=(
+                    f"Solo: {badge.name} ({badge.remaining} cards) · "
+                    f"flush in ~{farm_sec // 60} min"
+                ),
             )
             self.log(f"-> {badge.name} [{badge.app_id}] remaining={badge.remaining}")
             try:
@@ -239,43 +318,67 @@ class Orchestrator:
                 self.manager.start(badge.app_id)
             except Exception as exc:
                 self.log(f"Skipping {badge.app_id}: {exc}")
-                queue.pop(0)
+                skipped_ids.add(badge.app_id)
+                queue = [b for b in queue if b.app_id != badge.app_id]
                 continue
 
-            interval = (
-                self.cfg.check_interval_last_card_sec
-                if badge.remaining == 1
-                else self.cfg.check_interval_sec
-            )
-            while not self._stop.is_set():
-                if not self._wait(interval):
+            farm_end = time.time() + farm_sec
+            while time.time() < farm_end and not self._stop.is_set():
+                slice_sec = min(30.0, farm_end - time.time())
+                if slice_sec <= 0:
+                    break
+                if not self._wait(slice_sec):
                     break
                 if self._skip_current:
-                    self.log(f"Skip {badge.name}")
-                    self.manager.stop(badge.app_id)
-                    queue.pop(0)
                     break
-                assert self.session
-                refresh_badge(self.session, badge)
-                self._note_drops(queue)
-                self.emit(current=badge, badges=queue)
-                self.log(f"  check {badge.name}: {badge.remaining} left")
-                if badge.remaining == 0:
-                    self.manager.stop(badge.app_id)
-                    queue.pop(0)
-                    break
-                interval = (
-                    self.cfg.check_interval_last_card_sec
-                    if badge.remaining == 1
-                    else self.cfg.check_interval_sec
+                left = max(0, int(farm_end - time.time()))
+                self.emit(
+                    phase=Phase.NORMAL,
+                    current=badge,
+                    badges=queue,
+                    message=(
+                        f"Solo: {badge.name} · "
+                        f"flush in {left // 60}:{left % 60:02d} · "
+                        f"🎴 {self.drops.session_total}"
+                    ),
                 )
+                if badge.app_id not in self.manager.running_ids():
+                    self.log(f"Worker died: {badge.app_id} — will flush and continue")
+                    break
 
-            if not queue and not self._stop.is_set():
-                assert self.session
-                queue = fetch_badges(self.session, self.cfg)
-                self.emit(badges=queue)
+            if self._stop.is_set():
+                break
+
+            if self._skip_current:
+                self.log(f"Skip {badge.name}")
+                skipped_ids.add(badge.app_id)
+
+            self._flush_and_collect(queue, running_n=1)
+
+            try:
+                queue = self._rescan_after_flush()
+                queue = [b for b in queue if b.app_id not in skipped_ids]
+                self.emit(phase=Phase.NORMAL, badges=queue, current=None)
+            except Exception as exc:
+                self.log(f"Badge rescan after flush failed: {exc}")
+                # Fall back: refresh current badge page if possible
+                try:
+                    refresh_badge(self.session, badge)
+                    if badge.remaining <= 0 or badge.app_id in skipped_ids:
+                        queue = [b for b in queue if b.app_id != badge.app_id]
+                except Exception:
+                    pass
+
+        if self.manager.running_ids():
+            self.log("Final flush before exit…")
+            self._flush_and_collect(queue)
 
         self.manager.stop_all()
+        self.log(f"Session finished. Total drops: {self.drops.session_total}")
+        try:
+            self.drops.save()
+        except Exception:
+            pass
 
     def _fast_loop(self, badges: list[Badge]) -> None:
         """
@@ -288,8 +391,7 @@ class Orchestrator:
         assert self.session
         max_n = max(1, min(self.cfg.max_simultaneous, 32))
         active: dict[int, Badge] = {}
-        farm_sec = max(60, int(getattr(self.cfg, "farm_wave_sec", 120) or 120))
-        flush_sec = max(8, int(getattr(self.cfg, "flush_pause_sec", 15) or 15))
+        farm_sec, _flush_sec = self._wave_timings()
 
         def wave_cap(queue: list[Badge]) -> int:
             """Games we actually try to run this wave (not the raw concurrency setting)."""
@@ -345,51 +447,10 @@ class Orchestrator:
                     self.log(f"Worker died: {app_id}")
                     active.pop(app_id, None)
 
-        def flush_and_collect(queue: list[Badge]) -> list[CardDrop]:
-            """Stop all sessions, wait for Steam to credit drops, read inventory."""
-            nonlocal active
-            self.log(
-                f"Flush wave: stopping {len(active)} games for {flush_sec}s "
-                "(Steam credits cards after sessions close)"
-            )
-            self.emit(
-                phase=Phase.FLUSH,
-                badges=queue,
-                message=f"Flush: pausing {flush_sec}s — waiting for drops…",
-            )
-            self.manager.stop_all()
+        def flush_wave(queue: list[Badge]) -> list[CardDrop]:
+            n = len(active)
             active.clear()
-
-            # Uninterruptible: Steam often credits cards only after sessions fully end
-            self._flush_pause(flush_sec)
-
-            new_drops = self._note_inventory_drops()
-            if not new_drops:
-                self._flush_pause(5)
-                more = self._note_inventory_drops()
-                new_drops.extend(more)
-
-            if new_drops:
-                self.log(
-                    f"Flush: +{sum(d.count for d in new_drops)} cards "
-                    f"(session total {self.drops.session_total})"
-                )
-            else:
-                self.log("Flush: no new cards in inventory")
-
-            self.emit(
-                phase=Phase.FLUSH,
-                badges=queue,
-                message=(
-                    f"Flush done · 🎴 {self.drops.session_total}"
-                    + (
-                        f" · +{sum(d.count for d in new_drops)}"
-                        if new_drops
-                        else ""
-                    )
-                ),
-            )
-            return new_drops
+            return self._flush_and_collect(queue, running_n=n)
 
         queue = list(badges)
         wave = 0
@@ -446,17 +507,10 @@ class Orchestrator:
             if self._stop.is_set():
                 break
 
-            flush_and_collect(queue)
+            flush_wave(queue)
 
             try:
-                queue = fetch_badges(self.session, self.cfg)
-                if self.drops.inventory_primed:
-                    self.drops.update(queue)
-                else:
-                    self._note_drops(queue)
-                self.log(
-                    f"After flush: {len(queue)} games, {total_drops(queue)} cards remaining"
-                )
+                queue = self._rescan_after_flush()
             except Exception as exc:
                 self.log(f"Badge rescan after flush failed: {exc}")
 
@@ -483,7 +537,7 @@ class Orchestrator:
 
         if active or self.manager.running_ids():
             self.log("Final flush before exit…")
-            flush_and_collect(queue)
+            flush_wave(queue)
 
         self.manager.stop_all()
         self.log(f"Session finished. Total drops: {self.drops.session_total}")

@@ -30,7 +30,7 @@ class AppConfig:
     check_interval_sec: int = 900
     check_interval_last_card_sec: int = 300
     skip_f2p: bool = True
-    farm_wave_sec: int = 120
+    farm_wave_sec: int = 300
     flush_pause_sec: int = 15
     auto_browser_cookies: bool = True
     steam_path: str = ""

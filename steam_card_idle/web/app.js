@@ -140,7 +140,7 @@ function fillSettings(cfg) {
   if (ui.cfg.lang) ui.cfg.lang.value = cfg.language === "ru" ? "ru" : "en";
   ui.cfg.f2p.checked = !!cfg.skip_f2p;
   ui.cfg.sort.value = cfg.sort || "mostcards";
-  ui.cfg.farm.value = cfg.farm_wave_sec ?? 120;
+  ui.cfg.farm.value = cfg.farm_wave_sec ?? 300;
   ui.cfg.flush.value = cfg.flush_pause_sec ?? 15;
   ui.cfg.session.value = cfg.sessionid || "";
   ui.cfg.login.value = cfg.steam_login_secure || "";
@@ -151,7 +151,7 @@ function collectSettings() {
     language: ui.cfg.lang ? ui.cfg.lang.value : uiLang,
     skip_f2p: ui.cfg.f2p.checked,
     sort: ui.cfg.sort.value,
-    farm_wave_sec: Number(ui.cfg.farm.value || 120),
+    farm_wave_sec: Number(ui.cfg.farm.value || 300),
     flush_pause_sec: Number(ui.cfg.flush.value || 15),
     sessionid: ui.cfg.session.value,
     steam_login_secure: ui.cfg.login.value,

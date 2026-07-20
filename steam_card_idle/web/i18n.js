@@ -36,7 +36,7 @@ const I18N = {
     "plan.legend": "✓ farm · ⛔ never (blacklist)",
     "plan.hint_empty": "Load the game list — your full farm plan builds here.",
     "plan.hint_fast": "Farming {n} · up to {wave} at once{ban}",
-    "plan.hint_solo": "Solo: one at a time from {n}{ban}",
+    "plan.hint_solo": "Solo: one at a time from {n} · flush like Fast{ban}",
     "plan.ban_bit": " · ⛔ {n}",
     "plan.save": "Save plan",
     "plan.save_locked": "Stop farming first",
@@ -81,7 +81,7 @@ const I18N = {
       "mostcards — most cards first; leastcards — almost finished; default — Steam badge order.",
     "settings.farm_sec": "Farm until flush (sec)",
     "settings.farm_tip":
-      "How long to idle before stopping all games. Steam often credits cards when sessions end. Default 120 s (2 min).",
+      "How long to idle before a flush (Fast and Solo). Steam often credits cards when sessions end. Default 300 s (5 min).",
     "settings.flush_sec": "Flush pause (sec)",
     "settings.flush_tip":
       "Pause after stopping games so Steam can credit drops. Usually 10–20 s.",
@@ -145,7 +145,7 @@ const I18N = {
     "plan.legend": "✓ фармить · ⛔ никогда (blacklist)",
     "plan.hint_empty": "Загрузи список игр — здесь сложится весь план фарма.",
     "plan.hint_fast": "В фарме {n} · сразу до {wave}{ban}",
-    "plan.hint_solo": "Solo: по одной из {n}{ban}",
+    "plan.hint_solo": "Solo: по одной из {n} · flush как в Fast{ban}",
     "plan.ban_bit": " · ⛔ {n}",
     "plan.save": "Сохранить план",
     "plan.save_locked": "Сначала останови фарм",
@@ -190,7 +190,7 @@ const I18N = {
       "mostcards — больше карт сначала; leastcards — почти дофармленные; default — как на бейджах Steam.",
     "settings.farm_sec": "Фарм до сброса волны (сек)",
     "settings.farm_tip":
-      "Сколько секунд idle, прежде чем остановить все игры. Steam часто зачисляет карты при закрытии сессии. По умолчанию 120 с (2 мин).",
+      "Сколько секунд idle до flush (и Fast, и Solo). Steam часто зачисляет карты при закрытии сессии. По умолчанию 300 с (5 мин).",
     "settings.flush_sec": "Пауза после сброса (сек)",
     "settings.flush_tip":
       "Пауза после остановки игр, чтобы Steam успел зачислить дропы. Обычно 10–20 с.",
