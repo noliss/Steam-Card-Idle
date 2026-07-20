@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets & local runtime data
+config.json
+data/
+*.log
+login_debug.log
+
+# Build artifacts
+build/
+dist/
+release/
+*.zip
+!steam_card_idle.spec
+
+# IDE / OS / local tools
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.stackdump

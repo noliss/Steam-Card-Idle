@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-build.txt
+
+      - name: Build
+        run: python -m PyInstaller --noconfirm --clean steam_card_idle.spec
+
+      - name: Pack zip
+        shell: pwsh
+        run: |
+          $out = "SteamCardIdle-windows-x64"
+          New-Item -ItemType Directory -Force -Path "release/$out" | Out-Null
+          Copy-Item -Recurse -Force "dist/SteamCardIdle/*" "release/$out/"
+          Compress-Archive -Path "release/$out" -DestinationPath "release/$out.zip" -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SteamCardIdle-windows-x64
+          path: release/SteamCardIdle-windows-x64.zip
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/SteamCardIdle-windows-x64.zip
+          generate_release_notes: true
+          body: |
+            ## Steam Card Idle
+
+            1. Скачай `SteamCardIdle-windows-x64.zip`
+            2. Распакуй куда удобно
+            3. Запусти `SteamCardIdle.exe`
+            4. Открой Steam и войди в аккаунт
+
+            Python ставить не нужно. Нужны Windows 10/11 и установленный Steam.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

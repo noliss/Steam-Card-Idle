@@ -1,0 +1,21 @@
+{
+  "sessionid": "",
+  "steam_login_secure": "",
+  "profile_url": "",
+  "persona_name": "",
+  "avatar_url": "",
+  "blacklist": [],
+  "whitelist": [],
+  "whitelist_mode": false,
+  "sort": "mostcards",
+  "fast_mode": true,
+  "max_simultaneous": 20,
+  "check_interval_sec": 900,
+  "check_interval_last_card_sec": 300,
+  "skip_f2p": true,
+  "farm_wave_sec": 120,
+  "flush_pause_sec": 15,
+  "auto_browser_cookies": true,
+  "steam_path": "",
+  "language": "en"
+}

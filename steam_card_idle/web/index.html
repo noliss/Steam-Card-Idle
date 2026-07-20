@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Steam Card Idle</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <div class="shell__glow" aria-hidden="true"></div>
+
+    <div class="loader" id="global-loader" hidden aria-live="polite" aria-busy="true">
+      <div class="loader__veil"></div>
+      <div class="loader__card">
+        <div class="loader__ring"></div>
+        <p class="loader__text" id="loader-text" data-i18n="loader.loading">Loading…</p>
+      </div>
+    </div>
+
+    <header class="titlebar pywebview-drag-region">
+      <div class="titlebar__left">
+        <span class="titlebar__dot"></span>
+        <span class="titlebar__brand" id="win-title">Steam Card Idle</span>
+      </div>
+      <div class="titlebar__actions pywebview-no-drag">
+        <button type="button" class="win-btn" id="btn-min" data-i18n="common.min" data-i18n-attr="aria-label" aria-label="Minimize">–</button>
+        <button type="button" class="win-btn win-btn--close" id="btn-close" data-i18n="common.close" data-i18n-attr="aria-label" aria-label="Close">✕</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section class="view view--login is-active" id="view-login" data-view="login">
+        <div class="atmosphere" aria-hidden="true">
+          <div class="atmosphere__grid"></div>
+          <div class="atmosphere__orb atmosphere__orb--a"></div>
+          <div class="atmosphere__orb atmosphere__orb--b"></div>
+          <div class="atmosphere__scan"></div>
+        </div>
+        <div class="login">
+          <p class="eyebrow"><span class="eyebrow__line"></span> STEAM IDLE <span class="eyebrow__line"></span></p>
+          <h1 class="brand" data-text="Steam Card Idle">Steam Card Idle</h1>
+          <p class="lede" data-i18n="login.lede">Neon trading-card farming — fast, clean, quiet</p>
+
+          <button type="button" class="btn btn--neon" id="btn-steam">
+            <span class="btn__glow"></span>
+            <span class="btn__label" data-i18n="login.steam">Sign in with Steam</span>
+          </button>
+          <button type="button" class="btn btn--ghost" id="btn-alt-toggle" data-i18n="login.alt">
+            Other sign-in methods
+          </button>
+
+          <div class="alt glass" id="alt-panel" hidden>
+            <p class="alt__hint" data-i18n="login.alt_hint">Cookies · steamcommunity.com</p>
+            <input class="field" id="login-sessionid" type="text" placeholder="sessionid" spellcheck="false" />
+            <input class="field" id="login-secure" type="text" placeholder="steamLoginSecure" spellcheck="false" />
+            <div class="alt__row">
+              <button type="button" class="btn btn--glass" id="btn-browser" data-i18n="login.browser">From browser</button>
+              <button type="button" class="btn btn--cyan" id="btn-cookie-save" data-i18n="login.continue">Continue</button>
+            </div>
+          </div>
+
+          <p class="error" id="login-error" hidden></p>
+        </div>
+        <footer class="login__foot">
+          <span id="version">v—</span>
+        </footer>
+      </section>
+
+      <section class="view view--main" id="view-main" data-view="main">
+        <div class="atmosphere atmosphere--dim" aria-hidden="true">
+          <div class="atmosphere__grid"></div>
+          <div class="atmosphere__orb atmosphere__orb--c"></div>
+        </div>
+
+        <div class="profile glass glass--bar">
+          <button type="button" class="avatar" id="avatar" data-i18n="main.profile_title" data-i18n-attr="title" title="Open Steam profile" aria-label="Steam profile">
+            <span class="avatar__ring"></span>
+          </button>
+          <div class="profile__meta">
+            <div class="profile__name" id="persona">Player</div>
+            <div class="profile__sub"><span class="online-dot"></span> Steam account</div>
+          </div>
+          <button type="button" class="icon-btn" id="btn-games" data-i18n="main.games_title" data-i18n-attr="title" title="Game list" aria-label="Games">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="4" width="7" height="7" rx="1.5"/>
+              <rect x="3" y="13" width="7" height="7" rx="1.5"/>
+              <rect x="14" y="13" width="7" height="7" rx="1.5"/>
+            </svg>
+          </button>
+          <button type="button" class="icon-btn" id="btn-settings" data-i18n="main.settings_aria" data-i18n-attr="aria-label" aria-label="Settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/>
+              <path d="M19.4 13a7.7 7.7 0 0 0 .1-2l2-1.2-2-3.4-2.3.6a7.6 7.6 0 0 0-1.7-1L15 3h-6l-.5 2.9a7.6 7.6 0 0 0-1.7 1L4.5 6.4l-2 3.4 2 1.2a7.7 7.7 0 0 0 0 2l-2 1.2 2 3.4 2.3-.6a7.6 7.6 0 0 0 1.7 1L9 21h6l.5-2.9a7.6 7.6 0 0 0 1.7-1l2.3.6 2-3.4-2-1.2Z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="hero">
+          <button type="button" class="btn btn--start" id="btn-farm">
+            <span class="btn__glow"></span>
+            <span class="btn__label">START</span>
+          </button>
+          <div class="status">
+            <span class="pulse" id="pulse"></span>
+            <span id="status-text">Ready to start</span>
+          </div>
+          <button type="button" class="plan-chip" id="plan-chip" data-i18n="main.plan_title" data-i18n-attr="title" title="Open farm plan">
+            Fast Mode
+          </button>
+          <div class="metrics" id="metrics">
+            <div class="metric"><b id="m-games">—</b><span data-i18n="main.metric_games">games</span></div>
+            <div class="metric"><b id="m-cards">—</b><span data-i18n="main.metric_cards">cards</span></div>
+            <div class="metric"><b id="m-drops">0</b><span data-i18n="main.metric_drops">drops</span></div>
+          </div>
+        </div>
+
+        <div class="feed glass">
+          <div class="feed__head">
+            <span class="feed__title" data-i18n="main.feed_title">Recent drops</span>
+            <button type="button" class="btn btn--tiny" id="btn-copy" data-i18n="main.copy">Copy</button>
+          </div>
+          <pre class="feed__body" id="drops-list">Nothing yet.</pre>
+        </div>
+      </section>
+
+      <section class="view view--games" id="view-games" data-view="games">
+        <div class="atmosphere atmosphere--dim" aria-hidden="true">
+          <div class="atmosphere__grid"></div>
+        </div>
+        <div class="settings-top glass glass--bar">
+          <button type="button" class="icon-btn" id="btn-games-back" data-i18n="common.back" data-i18n-attr="aria-label" aria-label="Back">←</button>
+          <h2 data-i18n="plan.title">Farm plan</h2>
+          <div class="games-actions">
+            <button type="button" class="btn btn--tiny" id="btn-games-refresh" data-i18n="plan.refresh" data-i18n-attr="title" title="Refresh from Steam">↻</button>
+            <button type="button" class="btn btn--tiny" id="btn-games-all" data-i18n="plan.all">All</button>
+            <button type="button" class="btn btn--tiny" id="btn-games-none" data-i18n="plan.none">None</button>
+          </div>
+        </div>
+
+        <div class="plan-lock glass" id="plan-lock" hidden>
+          <strong data-i18n="plan.lock_title">Can't edit the plan while farming</strong>
+          <p data-i18n="plan.lock_body">
+            Idle is already running on the current plan. Changing games, blacklist, or Fast Mode mid-run can break the wave or start the wrong titles. Stop farming first, then edit freely.
+          </p>
+        </div>
+
+        <div class="plan glass" id="farm-plan">
+          <div class="plan__title" data-i18n="plan.how">How to farm</div>
+          <label class="plan__mode">
+            <input type="checkbox" id="plan-fast" />
+            <div>
+              <strong>Fast Mode</strong>
+              <span data-i18n="plan.fast_sub">Idle several games at once</span>
+            </div>
+          </label>
+          <div class="plan__max" id="plan-max-wrap">
+            <label class="plan__max-label" for="plan-max" data-i18n="plan.max">Simultaneous</label>
+            <input class="field plan__max-input" type="number" id="plan-max" min="1" max="32" />
+          </div>
+          <p class="plan__hint" id="plan-hint">Load the game list — your full farm plan builds here.</p>
+          <p class="plan__legend" data-i18n="plan.legend">✓ farm · ⛔ never (blacklist)</p>
+        </div>
+
+        <div class="games-scroll" id="games-list">
+          <p class="games-empty" id="games-empty" data-i18n="plan.loading">Loading…</p>
+        </div>
+        <div class="games-foot glass glass--bar">
+          <button type="button" class="btn btn--neon" id="btn-games-save">
+            <span class="btn__glow"></span>
+            <span class="btn__label" data-i18n="plan.save">Save plan</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="view view--settings" id="view-settings" data-view="settings">
+        <div class="atmosphere atmosphere--dim" aria-hidden="true">
+          <div class="atmosphere__grid"></div>
+        </div>
+        <div class="settings-top glass glass--bar">
+          <button type="button" class="icon-btn" id="btn-back" data-i18n="common.back" data-i18n-attr="aria-label" aria-label="Back">←</button>
+          <h2 data-i18n="settings.title">Settings</h2>
+        </div>
+
+        <div class="plan-lock glass" id="settings-lock" hidden>
+          <strong data-i18n="settings.lock_title">Can't change settings while farming</strong>
+          <p data-i18n="settings.lock_body">
+            Flush timings, cookies, and queue filters are already used by idle. Changing them mid-run can break the wave or drop tracking. Stop farming, then save settings.
+          </p>
+        </div>
+
+        <div class="settings-scroll">
+          <h3 class="sec" data-i18n="settings.sec_lang">Language</h3>
+          <label class="row row--lang">
+            <span class="row__label" data-i18n="settings.lang">Interface language</span>
+            <select class="field" id="cfg-lang">
+              <option value="en">English</option>
+              <option value="ru">Русский</option>
+            </select>
+          </label>
+
+          <h3 class="sec" data-i18n="settings.sec_farm">Farm</h3>
+          <button type="button" class="farm-link glass" id="btn-open-plan">
+            <div>
+              <strong data-i18n="settings.plan_link">Farm plan</strong>
+              <span id="settings-plan-summary" data-i18n="settings.plan_sum">Fast Mode, limit, and game picks — in one place</span>
+            </div>
+            <span class="farm-link__arrow">→</span>
+          </button>
+          <label class="row check glass glass--row">
+            <input type="checkbox" id="cfg-f2p" />
+            <span data-i18n="settings.f2p">Skip Free-to-Play</span>
+            <span class="help" data-i18n-tip="settings.f2p_tip" data-tip="Many F2P titles don't drop cards without purchases — without this filter the queue fills with duds.">?</span>
+          </label>
+          <label class="row">
+            <span class="row__label"><span data-i18n="settings.sort">Queue sort</span> <span class="help" data-i18n-tip="settings.sort_tip" data-tip="mostcards — most cards first; leastcards — almost finished; default — Steam badge order.">?</span></span>
+            <select class="field" id="cfg-sort">
+              <option value="mostcards">mostcards</option>
+              <option value="leastcards">leastcards</option>
+              <option value="default">default</option>
+            </select>
+          </label>
+
+          <h3 class="sec" data-i18n="settings.sec_flush">Flush wave</h3>
+          <label class="row">
+            <span class="row__label"><span data-i18n="settings.farm_sec">Farm until flush (sec)</span> <span class="help" data-i18n-tip="settings.farm_tip" data-tip="How long to idle before stopping all games. Steam often credits cards when sessions end. ~600 s.">?</span></span>
+            <input class="field" type="number" id="cfg-farm" min="120" />
+          </label>
+          <label class="row">
+            <span class="row__label"><span data-i18n="settings.flush_sec">Flush pause (sec)</span> <span class="help" data-i18n-tip="settings.flush_tip" data-tip="Pause after stopping games so Steam can credit drops. Usually 10–20 s.">?</span></span>
+            <input class="field" type="number" id="cfg-flush" min="5" />
+          </label>
+
+          <h3 class="sec" data-i18n="settings.sec_session">Session</h3>
+          <label class="row">
+            <span class="row__label">sessionid <span class="help" data-i18n-tip="settings.session_tip" data-tip="sessionid cookie from steamcommunity.com for badges and inventory.">?</span></span>
+            <div class="secret">
+              <input class="field secret__input" type="password" id="cfg-session" spellcheck="false" autocomplete="off" />
+              <button type="button" class="secret__toggle" data-for="cfg-session" data-i18n="common.show" data-i18n-attr="title" aria-label="Show" title="Show / hide">
+                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" hidden><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.2 3.9"/><path d="M6.1 6.1C3.8 7.8 2 12 2 12s3.5 7 10 7a10.5 10.5 0 0 0 4.2-.9"/></svg>
+              </button>
+            </div>
+          </label>
+          <label class="row">
+            <span class="row__label">steamLoginSecure <span class="help" data-i18n-tip="settings.login_tip" data-tip="Main Community auth cookie. Stored locally in config.json.">?</span></span>
+            <div class="secret">
+              <input class="field secret__input" type="password" id="cfg-login" spellcheck="false" autocomplete="off" />
+              <button type="button" class="secret__toggle" data-for="cfg-login" data-i18n="common.show" data-i18n-attr="title" aria-label="Show" title="Show / hide">
+                <svg class="icon-eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="icon-eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" hidden><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-3.2 3.9"/><path d="M6.1 6.1C3.8 7.8 2 12 2 12s3.5 7 10 7a10.5 10.5 0 0 0 4.2-.9"/></svg>
+              </button>
+            </div>
+          </label>
+
+          <h3 class="sec" data-i18n="settings.sec_log">Log</h3>
+          <p class="log-hint" data-i18n="settings.log_hint">Full debug log for issues. You can copy it all.</p>
+          <div class="log-toolbar">
+            <button type="button" class="btn btn--tiny" id="btn-log-copy" data-i18n="settings.log_copy">Copy log</button>
+            <button type="button" class="btn btn--tiny" id="btn-log-clear" data-i18n="settings.log_clear">Clear</button>
+            <button type="button" class="btn btn--tiny" id="btn-log-refresh" data-i18n="settings.log_refresh">Refresh</button>
+          </div>
+          <pre class="log-box" id="log-box">—</pre>
+
+          <button type="button" class="btn btn--neon settings-save" id="btn-save">
+            <span class="btn__glow"></span>
+            <span class="btn__label" data-i18n="settings.save">Save</span>
+          </button>
+          <button type="button" class="btn btn--ghost settings-logout" id="btn-logout" data-i18n="settings.logout">Sign out</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
