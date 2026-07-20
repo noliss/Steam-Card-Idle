@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-readme.jpg" alt="Steam Card Idle" width="320">
+</p>
+
 # Steam Card Idle
 
 Фарм Steam Trading Cards на Windows — скачал, запустил, собрал карты.  
