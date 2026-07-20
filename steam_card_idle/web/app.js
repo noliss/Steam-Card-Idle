@@ -630,6 +630,12 @@ function bind() {
     const log = await call("get_log");
     if (log != null) window.applyLog(log);
   });
+  document.querySelectorAll("a.author-link").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      call("open_url", el.getAttribute("href") || "https://t.me/misterave");
+    });
+  });
   ui.btnBack.addEventListener("click", () => showView("main"));
   ui.btnSave.addEventListener("click", async () => {
     if (isFarming) return;
@@ -650,7 +656,8 @@ function bind() {
       updatePlanChip(lastPlan, lastMetrics.games);
       updatePlanHint();
       setPlanLocked(isFarming);
-      await call("set_language", lang);
+      const state = await call("set_language", lang);
+      if (state) window.applyState(state);
     });
   }
 

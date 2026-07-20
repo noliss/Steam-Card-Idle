@@ -66,6 +66,10 @@ const I18N = {
     "settings.sec_session": "Session",
     "settings.sec_log": "Log",
     "settings.sec_lang": "Language",
+    "settings.sec_author": "Author",
+    "settings.author_label": "Telegram",
+    "settings.repo_label": "GitHub",
+    "settings.repo_sum": "Source code & releases",
     "settings.lang": "Interface language",
     "settings.plan_link": "Farm plan",
     "settings.plan_sum": "Fast Mode, limit, and game picks — in one place",
@@ -171,6 +175,10 @@ const I18N = {
     "settings.sec_session": "Сессия",
     "settings.sec_log": "Лог",
     "settings.sec_lang": "Язык",
+    "settings.sec_author": "Автор",
+    "settings.author_label": "Telegram",
+    "settings.repo_label": "GitHub",
+    "settings.repo_sum": "Исходники и релизы",
     "settings.lang": "Язык интерфейса",
     "settings.plan_link": "План фарма",
     "settings.plan_sum": "Fast Mode, лимит и выбор игр — в одном месте",
@@ -180,10 +188,10 @@ const I18N = {
     "settings.sort": "Сортировка очереди",
     "settings.sort_tip":
       "mostcards — больше карт сначала; leastcards — почти дофармленные; default — как на бейджах Steam.",
-    "settings.farm_sec": "Фарм до flush (сек)",
+    "settings.farm_sec": "Фарм до сброса волны (сек)",
     "settings.farm_tip":
       "Сколько секунд idle, прежде чем остановить все игры. Steam часто зачисляет карты при закрытии сессии. По умолчанию 120 с (2 мин).",
-    "settings.flush_sec": "Пауза flush (сек)",
+    "settings.flush_sec": "Пауза после сброса (сек)",
     "settings.flush_tip":
       "Пауза после остановки игр, чтобы Steam успел зачислить дропы. Обычно 10–20 с.",
     "settings.session_tip":

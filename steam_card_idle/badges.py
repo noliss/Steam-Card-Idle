@@ -96,7 +96,7 @@ def fetch_badges(
     http = http_client(session)
     profile = (cfg.profile_url or session.profile_url).rstrip("/")
     if not profile:
-        raise RuntimeError("profile_url пуст — сначала настрой сессию.")
+        raise RuntimeError("profile_url is empty — set up the session first.")
 
     blacklist = {str(x) for x in cfg.blacklist} if honor_blacklist else set()
     by_id: dict[int, Badge] = {}
@@ -107,7 +107,7 @@ def fetch_badges(
         url = f"{profile}/badges/?p={page}"
         resp = request_get(http, url, timeout=(8, 40), retries=3)
         if "login" in resp.url.lower() and "badges" not in resp.url.lower():
-            raise RuntimeError("Сессия истекла — обнови cookies.")
+            raise RuntimeError("Session expired — refresh cookies.")
 
         soup = BeautifulSoup(resp.text, "lxml")
         if page == 1:

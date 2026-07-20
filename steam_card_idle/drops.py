@@ -26,10 +26,10 @@ class CardDrop:
     def label(self) -> str:
         if self.card_name:
             return f"{self.time}  ·  {self.game}  ·  {self.card_name}"
-        plural = "карта" if self.count == 1 else ("карты" if self.count < 5 else "карт")
+        plural = "card" if self.count == 1 else "cards"
         return (
             f"{self.time}  ·  {self.game}  ·  +{self.count} {plural} "
-            f"(осталось {self.remaining_after})"
+            f"(remaining {self.remaining_after})"
         )
 
 

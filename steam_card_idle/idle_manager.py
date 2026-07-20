@@ -50,8 +50,8 @@ class IdleManager:
     def ensure_ready(self) -> None:
         if self.dll_path is None or not self.dll_path.exists():
             raise RuntimeError(
-                "Не найден steam_api64.dll. Положи файл в папку native/ "
-                "(обычно он уже есть в проекте)."
+                "steam_api64.dll not found. Put the file in native/ "
+                "(it is usually already in the project)."
             )
 
     def start(self, app_id: int) -> IdleProcess:
@@ -100,7 +100,7 @@ class IdleManager:
             cmd = [exe, "--idle-worker", str(app_id), "--dll", str(local_dll)]
         else:
             if not WORKER_SCRIPT.exists():
-                raise RuntimeError(f"Не найден idle_worker.py: {WORKER_SCRIPT}")
+                raise RuntimeError(f"idle_worker.py not found: {WORKER_SCRIPT}")
             env["PYTHONPATH"] = str(config.ROOT) + os.pathsep + env.get(
                 "PYTHONPATH", ""
             )
@@ -125,8 +125,8 @@ class IdleManager:
                 err = err_file.read_text(encoding="utf-8", errors="replace").strip()
             self._failed.add(app_id)
             raise RuntimeError(
-                f"Idle worker для {app_id} сразу завершился. "
-                f"Steam запущен? {err}"
+                f"Idle worker for {app_id} exited immediately. "
+                f"Is Steam running? {err}"
             )
 
         item = IdleProcess(app_id=app_id, process=proc, work_dir=work_dir)
@@ -136,7 +136,7 @@ class IdleManager:
             time.sleep(0.2)
         if not item.alive:
             self._failed.add(app_id)
-            raise RuntimeError(f"Idle worker для {app_id} умер сразу после старта.")
+            raise RuntimeError(f"Idle worker for {app_id} died right after start.")
 
         self._failed.discard(app_id)
         self._procs[app_id] = item

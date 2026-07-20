@@ -156,9 +156,9 @@ def load_browser_cookies() -> tuple[str, str]:
             return sessionid, normalize_login_secure(login)
 
     raise SessionError(
-        "Не удалось взять cookies из браузера. "
-        "Залогинься на steamcommunity.com в Chrome/Edge и попробуй снова, "
-        "или вставь sessionid + steamLoginSecure вручную."
+        "Could not read cookies from the browser. "
+        "Sign in on steamcommunity.com in Chrome/Edge and try again, "
+        "or paste sessionid + steamLoginSecure manually."
     )
 
 
@@ -178,15 +178,15 @@ def resolve_profile(http: requests.Session) -> tuple[str, str, str, str]:
     cookie_hint = f" cookie_header_len={len(cookie_hdr)} final_url={url}"
     if "/login" in path:
         raise SessionError(
-            "Cookies недействительны — Steam просит логин. "
-            "Нужны cookies именно с steamcommunity.com (не store)."
+            "Cookies invalid — Steam asks for login. "
+            "Need cookies from steamcommunity.com (not the store)."
             + cookie_hint
         )
 
     match = re.search(r"(https://steamcommunity\.com/(?:profiles|id)/[^/?#]+)", url)
     if not match:
         raise SessionError(
-            f"Не удалось определить профиль из URL: {url}.{cookie_hint} "
+            f"Could not resolve profile from URL: {url}.{cookie_hint} "
             f"status={resp.status_code} body_snip={resp.text[:160]!r}"
         )
 
@@ -230,7 +230,7 @@ def session_from_cfg(cfg: AppConfig, sessionid: str, login: str) -> SteamSession
     """Build SteamSession using profile fields already stored in config."""
     profile_url = (cfg.profile_url or "").rstrip("/")
     if not profile_url:
-        raise SessionError("Нет сохранённого profile_url для offline-сессии.")
+        raise SessionError("No saved profile_url for offline session.")
     return SteamSession(
         sessionid=sessionid,
         steam_login_secure=login,
@@ -281,7 +281,7 @@ def build_session(
 
     if not sessionid or not login:
         raise SessionError(
-            "Нет сессии. Нажми «Войти через Steam» или выполни: "
+            "No session. Click Sign in with Steam or run: "
             "python -m steam_card_idle setup --login"
         )
 
@@ -303,8 +303,8 @@ def build_session(
             cfg.save()
             return offline
         raise SessionError(
-            f"Steam community недоступен ({exc}). "
-            "Проверь сеть/VPN и попробуй снова."
+            f"Steam Community unavailable ({exc}). "
+            "Check network/VPN and try again."
         ) from exc
 
     steam.profile_url = profile_url

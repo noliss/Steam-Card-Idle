@@ -60,7 +60,7 @@ def fetch_trading_cards(session: SteamSession, *, count: int = 2500) -> list[Inv
         if m:
             steam_id = m.group(1)
     if not steam_id:
-        raise RuntimeError("Нет steam_id64 — нельзя прочитать инвентарь.")
+        raise RuntimeError("No steam_id64 — cannot read inventory.")
 
     http = http_client(session)
     url = f"https://steamcommunity.com/inventory/{steam_id}/753/6"
@@ -85,18 +85,18 @@ def fetch_trading_cards(session: SteamSession, *, count: int = 2500) -> list[Inv
             status = getattr(exc.response, "status_code", None)
             if status == 403:
                 raise RuntimeError(
-                    "Инвентарь недоступен (403). Сделай инвентарь видимым для себя "
-                    "(Profile → Inventory → Private всё ещё читается с cookies; "
-                    "проверь сессию)."
+                    "Inventory unavailable (403). Make sure your inventory is "
+                    "readable with your session cookies "
+                    "(Profile → Inventory; Private still works with cookies)."
                 ) from exc
             raise
         data = resp.json()
         if not data:
-            raise RuntimeError("Инвентарь: пустой ответ")
+            raise RuntimeError("Inventory: empty response")
         if data.get("success") in (0, False) and not data.get("assets"):
             if data.get("total_inventory_count") == 0:
                 break
-            raise RuntimeError(f"Инвентарь: неожиданный ответ {data!r}"[:240])
+            raise RuntimeError(f"Inventory: unexpected response {data!r}"[:240])
 
         assets = data.get("assets") or []
         descriptions = data.get("descriptions") or []

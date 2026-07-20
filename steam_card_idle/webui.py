@@ -18,7 +18,7 @@ from . import __version__
 from .badges import Badge, fetch_badges, total_drops
 from .config import AppConfig, ensure_dirs
 from .drops import DropTracker
-from .i18n import normalize_lang, t as tr
+from .i18n import MESSAGES, normalize_lang, t as tr
 from .orchestrator import FarmStatus, Orchestrator, Phase
 from .session import apply_captured_cookies, build_session, make_http
 from .steam_login import login_with_steam
@@ -27,6 +27,9 @@ from .steam_paths import find_steam_api_dll, find_steam_path, is_steam_running
 WEB_DIR = Path(__file__).resolve().parent / "web"
 LOG_MAX = 2000
 BADGES_CACHE_TTL_SEC = 90.0
+
+# Status strings that follow UI language (farm wave text stays English).
+_STATUS_KEYS = frozenset(MESSAGES["en"].keys())
 
 
 class Bridge:
@@ -38,6 +41,7 @@ class Bridge:
         self._busy = False
         self._busy_msg = ""
         self._error = ""
+        self._status_key = "ready"
         self._status = tr(self.cfg.language, "ready")
         self._games = "—"
         self._cards = "—"
@@ -101,6 +105,31 @@ class Bridge:
 
     def _t(self, key: str, **kwargs: Any) -> str:
         return tr(self.cfg.language, key, **kwargs)
+
+    def _set_status(self, text_or_key: str, *, key: str | None = None) -> None:
+        """Set status. Pass key= for localizable UI statuses; omit for farm English text."""
+        if key:
+            self._status_key = key
+            self._status = self._t(key)
+        elif text_or_key in _STATUS_KEYS:
+            self._status_key = text_or_key
+            self._status = self._t(text_or_key)
+        else:
+            self._status_key = None
+            self._status = text_or_key
+
+    def _refresh_status_lang(self) -> None:
+        if self._status_key:
+            self._status = self._t(self._status_key)
+            return
+        # Recover key if status text matches a known translation (e.g. after lang switch).
+        current = self._status
+        for pack in MESSAGES.values():
+            for key, text in pack.items():
+                if text == current:
+                    self._status_key = key
+                    self._status = self._t(key)
+                    return
 
     def _cfg_public(self) -> dict[str, Any]:
         return {
@@ -308,7 +337,7 @@ class Bridge:
                 self._games = str(len(badges))
                 self._cards = str(total_drops(badges))
                 if not self._farming:
-                    self._status = self._t("ready")
+                    self._set_status("ready")
                 self._error = ""
                 tag = "network" if from_net else ("stale" if stale else "cache")
                 self.log(
@@ -316,7 +345,7 @@ class Bridge:
                     f"{total_drops(badges)} cards remaining"
                 )
             except Exception as exc:
-                self._status = str(exc)[:120]
+                self._set_status(str(exc)[:120])
                 self._games, self._cards = "—", "—"
                 self.log(f"Queue refresh error: {exc}")
             finally:
@@ -350,9 +379,20 @@ class Bridge:
             except Exception:
                 return False
 
+    def open_url(self, url: str = "") -> bool:
+        target = (url or "").strip()
+        if not target.startswith(("http://", "https://", "tg://")):
+            return False
+        try:
+            webbrowser.open(target)
+            return True
+        except Exception as exc:
+            self.log(f"open_url failed: {exc}")
+            return False
+
     def _boot_resume(self) -> None:
         self._set_busy(True, msg=self._t("checking_session"))
-        self._status = self._t("checking_session")
+        self._set_status("checking_session")
         self.push()
         try:
             session = build_session(self.cfg, force_browser=False)
@@ -364,7 +404,7 @@ class Bridge:
         except Exception as exc:
             self._authed = False
             self._set_busy(False, str(exc))
-            self._status = self._t("login_needed")
+            self._set_status("login_needed")
             self.log(f"Session resume failed: {exc}")
             self.push()
 
@@ -374,7 +414,7 @@ class Bridge:
 
         def work() -> None:
             self._set_busy(True, msg=self._t("auth"))
-            self._status = self._t("waiting_login")
+            self._set_status("waiting_login")
             self.log("Steam login started")
             self.push()
             try:
@@ -397,7 +437,7 @@ class Bridge:
 
         def work() -> None:
             self._set_busy(True, msg=self._t("reading_cookies"))
-            self._status = self._t("reading_cookies")
+            self._set_status("reading_cookies")
             self.log("Reading browser cookies")
             self.push()
             try:
@@ -420,7 +460,7 @@ class Bridge:
 
         def work() -> None:
             self._set_busy(True, msg=self._t("checking_cookies"))
-            self._status = self._t("checking_cookies")
+            self._set_status("checking_cookies")
             self.log("Manual cookie login")
             self.push()
             try:
@@ -468,7 +508,7 @@ class Bridge:
             }
             if stale:
                 out["warning"] = (
-                    "Steam не ответил вовремя — показан предыдущий список."
+                    "Steam did not respond in time — showing previous list."
                 )
             return out
         except Exception as exc:
@@ -557,14 +597,14 @@ class Bridge:
 
     def _start_farm(self) -> None:
         if not is_steam_running():
-            self._status = self._t("steam_not_running")
-            self.log(self._status)
+            self._set_status("steam_not_running")
+            self.log(tr("en", "steam_not_running"))
             self.push()
             return
         if not find_steam_api_dll(find_steam_path(self.cfg.steam_path)):
-            self._status = self._t("dll_missing")
+            self._set_status("dll_missing")
             self._error = self._status
-            self.log(self._status)
+            self.log(tr("en", "dll_missing"))
             self.push()
             return
 
@@ -575,7 +615,7 @@ class Bridge:
             self._games = games
             self._cards = str(st.total_remaining)
             self._drops = str(st.session_drops)
-            self._status = st.message or st.phase.value
+            self._set_status(st.message or st.phase.value)
             if st.recent_drops:
                 self._drops_text = "\n".join(
                     d.label() for d in reversed(st.recent_drops[-40:])
@@ -600,7 +640,7 @@ class Bridge:
         )
         self.orch.start_async()
         self._farming = True
-        self._status = self._t("farm_start")
+        self._set_status("farm_start")
         self.push()
 
     def _stop_farm(self) -> None:
@@ -613,7 +653,7 @@ class Bridge:
             self.orch.stop()
             self._load_drop_counts()
         self._farming = False
-        self._status = self._t("farm_stop")
+        self._set_status("ready")
         self.push()
 
     def copy_drops(self) -> str:
@@ -632,6 +672,7 @@ class Bridge:
     def set_language(self, lang: str = "en") -> dict[str, Any]:
         self.cfg.language = normalize_lang(lang)
         self.cfg.save()
+        self._refresh_status_lang()
         self.push()
         return {"ok": True, "language": self.cfg.language, **self.state()}
 
@@ -647,6 +688,7 @@ class Bridge:
         self.cfg.sort = str(cfg.get("sort") or self.cfg.sort)
         if "language" in cfg:
             self.cfg.language = normalize_lang(str(cfg.get("language") or "en"))
+            self._refresh_status_lang()
         try:
             self.cfg.farm_wave_sec = max(120, int(cfg.get("farm_wave_sec", self.cfg.farm_wave_sec)))
         except (TypeError, ValueError):
@@ -692,7 +734,7 @@ class Bridge:
         self._games = self._cards = "—"
         self._drops = "0"
         self._drops_text = ""
-        self._status = self._t("login_needed")
+        self._set_status("login_needed")
         self._error = ""
         self.push()
         return self.state()

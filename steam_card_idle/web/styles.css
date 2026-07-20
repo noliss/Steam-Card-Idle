@@ -1066,6 +1066,15 @@ button, input, select { font: inherit; color: inherit; }
   font-size: 18px;
 }
 
+a.author-link {
+  text-decoration: none;
+}
+a.author-link .author-handle {
+  color: var(--cyan);
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
 /* ——— games ——— */
 .settings-top .games-actions {
   margin-left: auto;
@@ -1201,7 +1210,7 @@ button, input, select { font: inherit; color: inherit; }
 }
 
 .view--settings.is-settings-locked .settings-scroll .row:not(.row--lang),
-.view--settings.is-settings-locked .settings-scroll .farm-link,
+.view--settings.is-settings-locked .settings-scroll .farm-link:not(.author-link),
 .view--settings.is-settings-locked .settings-scroll .settings-save,
 .view--settings.is-settings-locked .settings-scroll .settings-logout {
   opacity: 0.55;

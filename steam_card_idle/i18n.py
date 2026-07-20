@@ -49,25 +49,26 @@ MESSAGES: dict[str, dict[str, str]] = {
         "saving_plan": "Сохраняю план…",
         "saving_settings": "Сохраняю настройки…",
         "logout": "Выход…",
-        "farm_start": "Запуск…",
-        "farm_stop": "Остановлено",
-        "steam_not_running": "Сначала запусти клиент Steam",
+        # Farm / session activity strings stay English (same as logs & orchestrator).
+        "farm_start": "Starting…",
+        "farm_stop": "Stopped",
+        "steam_not_running": "Start the Steam client first",
         "dll_missing": (
-            "Нет steam_api64.dll в native/ — скачай проект целиком "
-            "или положи DLL в папку native/"
+            "Missing steam_api64.dll in native/ — download the full release "
+            "or put the DLL into the native/ folder"
         ),
         "plan_locked": (
-            "План нельзя менять во время фарма: idle уже идёт по текущей "
-            "очереди. Смена списка/blacklist/Fast Mode на лету может "
-            "оборвать волну. Сначала Stop."
+            "Can't change the farm plan while farming: idle already follows "
+            "the current queue. Change games/blacklist/Fast Mode mid-run can "
+            "break the wave. Stop first."
         ),
         "settings_locked": (
-            "Настройки нельзя менять во время фарма: flush/cookies/фильтры "
-            "уже используются idle. Сначала Stop."
+            "Can't change settings while farming: flush/cookies/filters are "
+            "in use by idle. Stop first."
         ),
-        "logout_locked": "Сначала останови фарм — выход оборвёт idle и сессию на ходу.",
-        "auth": "Авторизация…",
-        "reading_badges": "Читаю badges…",
+        "logout_locked": "Stop farming first — logout would kill the idle session.",
+        "auth": "Signing in…",
+        "reading_badges": "Reading badges…",
     },
 }
 

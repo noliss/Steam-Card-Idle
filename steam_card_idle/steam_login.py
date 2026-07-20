@@ -133,8 +133,8 @@ def _launch_browser(playwright: Any, log: LogFn) -> Any:
     except Exception as exc:
         errors.append(f"chromium: {exc}")
         raise SessionError(
-            "Не удалось запустить браузер для входа.\n"
-            "Нужен установленный Microsoft Edge или Google Chrome.\n"
+            "Could not launch a browser for sign-in.\n"
+            "Install Microsoft Edge or Google Chrome.\n"
             + " | ".join(errors[:3])
         ) from exc
 
@@ -181,14 +181,14 @@ def login_with_steam(
     except ImportError as exc:
         log("[login] playwright not installed")
         raise SessionError(
-            "Нужен пакет playwright. Установи: pip install playwright"
+            "playwright package required. Install: pip install playwright"
         ) from exc
 
     with sync_playwright() as p:
         browser = _launch_browser(p, log)
         context = browser.new_context(
             viewport={"width": 1040, "height": 720},
-            locale="ru-RU",
+            locale="en-US",
             user_agent=(
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                 "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -203,7 +203,7 @@ def login_with_steam(
         except Exception as exc:
             log(f"[login] initial goto failed: {exc}")
             browser.close()
-            raise SessionError(f"Не удалось открыть страницу входа Steam: {exc}") from exc
+            raise SessionError(f"Could not open Steam login page: {exc}") from exc
 
         deadline = time.time() + timeout_sec
         last_names: list[str] = []
