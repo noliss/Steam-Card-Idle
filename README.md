@@ -36,8 +36,8 @@ Python, pip и прочий ад ставить **не нужно**.
 - **Пароль Steam мы не храним.** Вход идёт через обычное окно браузера (Edge/Chrome), как на самом Steam. В приложении остаются только локальные session cookies, чтобы читать бейджи и инвентарь.
 - **Открытый исходный код.** Можно самому посмотреть, что делает программа, или собрать exe из исходников.
 - **Steam остаётся Steam.** Мы не подменяем клиент и не просим «ввести логин на левом сайте» — нужен уже запущенный официальный Steam.
-- **[VirusTotal](https://www.virustotal.com/gui/url/fa19a80239c94495563264059c94d4e98009aee9cc7f79d0bbbd42e977f368b7)** — проверка download URL (пример для v1.0.0; для нового релиза лучше пересканировать zip).
-- **SHA256** меняется с каждым релизом — сверяй файл из **[Releases](../../releases)** локально: `Get-FileHash SteamCardIdle-windows-x64.zip -Algorithm SHA256`.
+- **[VirusTotal](https://www.virustotal.com/gui/url/863306945c7f97aa61b91bb592d504c739b6d684770730a148fb1779c7b8ca2b)** — проверка download URL релиза v1.0.1.
+- **SHA256** (`SteamCardIdle-windows-x64.zip` v1.0.1): `BEE4C8CAF8574639CCE7684F2816DBFE3F5038B4E7145A670273A420DF3E201D`
 
 > Используй на свой страх и риск: idle farming может противоречить правилам Steam. К аккаунту относись бережно (не шарь `config.json` с cookies).
 
@@ -70,8 +70,8 @@ No Python, pip, or other setup required.
 - **We don’t store your Steam password.** Sign-in uses a normal browser window (Edge/Chrome), just like Steam itself. The app only keeps local session cookies to read badges and inventory.
 - **Open source.** You can check what the program does, or build the exe from source yourself.
 - **Steam stays Steam.** We don’t replace the client or ask you to log in on a shady site — you need the official Steam client already running.
-- **[VirusTotal](https://www.virustotal.com/gui/url/fa19a80239c94495563264059c94d4e98009aee9cc7f79d0bbbd42e977f368b7)** — download URL scan (example for v1.0.0; re-scan the zip for each new release).
-- **SHA256** changes every release — verify the file from **[Releases](../../releases)** locally: `Get-FileHash SteamCardIdle-windows-x64.zip -Algorithm SHA256`.
+- **[VirusTotal](https://www.virustotal.com/gui/url/863306945c7f97aa61b91bb592d504c739b6d684770730a148fb1779c7b8ca2b)** — scan of the v1.0.1 release zip download URL.
+- **SHA256** (`SteamCardIdle-windows-x64.zip` v1.0.1): `BEE4C8CAF8574639CCE7684F2816DBFE3F5038B4E7145A670273A420DF3E201D`
 
 > Use at your own risk: idle farming may conflict with Steam’s rules. Treat your account carefully (don’t share `config.json` with cookies).
 
